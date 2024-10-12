@@ -1,0 +1,28 @@
+name: devfest_ilorin_example
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  flutter_tts: ^4.0.2
+  google_generative_ai: ^0.4.6
+  rive: ^0.13.14
+  speech_to_text: ^7.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+   - assets/images/
+   - assets/rive/
