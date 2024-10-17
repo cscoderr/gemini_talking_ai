@@ -14,6 +14,7 @@ dependencies:
   google_generative_ai: ^0.4.6
   rive: ^0.13.14
   speech_to_text: ^7.0.0
+  typewritertext: ^3.0.9
 
 dev_dependencies:
   flutter_test:
