@@ -23,7 +23,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   late RiveService _riveService;
 
   late StreamSubscription _sttStatusSubscription;
-  final String _lastWords = '';
   final _messageController = TextEditingController();
 
   @override
@@ -39,7 +38,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     _sttStatusSubscription = _sttService.statusListener.listen(
       (status) {
-        print(status);
         if (status == SpeechToTextStatus.listening) {
           _riveService.onChange(AvatarRiveSMI.check.text, true);
         } else {
@@ -60,24 +58,34 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _startListeningToSpeech() async {
     await _sttService.startListening(
       onResult: (result) {
-        print(result.recognizedWords);
         _messageController.text = result.recognizedWords;
         setState(() {});
+
+        if (result.isFinalResult) {
+          _riveService.onChange(AvatarRiveSMI.hear.text, false);
+          _riveService.onChange(AvatarRiveSMI.check.text, true);
+          ref.read(appProvider.notifier).getResponse(result.recognizedWords);
+        }
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(appProvider);
     ref.listen(
       appProvider,
       (previous, next) {
         _riveService.onChange(AvatarRiveSMI.check.text, false);
-        if (next.message.isNotEmpty) {
-          _riveService.onChange(AvatarRiveSMI.talk.text, true);
-          _ttsService.speak(next.message);
-          _riveService.onChange(AvatarRiveSMI.talk.text, false);
-        }
+        next.whenData(
+          (value) async {
+            _riveService.onChange(AvatarRiveSMI.talk.text, true);
+            await _ttsService.speak(value);
+            _riveService.onChange(AvatarRiveSMI.talk.text, false);
+            _messageController.clear();
+            setState(() {});
+          },
+        );
       },
     );
 
@@ -90,17 +98,18 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             _RiveAnimationWidget(riveService: _riveService),
             const SizedBox(height: 15),
-            const Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    ChatBubble(),
-                    // if (_lastWords.isNotEmpty)
-                    //   ChatBubble(
-                    //     text: _lastWords,
-                    //   ),
-                  ],
-                ),
+            Expanded(
+              child: Column(
+                children: [
+                  state.maybeWhen(
+                      orElse: () => const SizedBox(),
+                      data: (data) {
+                        if (data != null) {
+                          return ChatBubble(text: data);
+                        }
+                        return const SizedBox();
+                      })
+                ],
               ),
             ),
             const SizedBox(height: 15),
@@ -113,24 +122,28 @@ class _HomePageState extends ConsumerState<HomePage> {
                   onPressed: () async {
                     if (_sttService.status.isNotListening ||
                         _sttService.status.isUnknown) {
+                      _riveService.onChange(AvatarRiveSMI.hear.text, true);
+
                       await _startListeningToSpeech();
                       setState(() {});
                     } else {
+                      _riveService.onChange(AvatarRiveSMI.hear.text, false);
                       await _sttService.stopListening();
                       setState(() {});
                     }
                   },
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: AppTextField(
+                    controller: _messageController,
                     hintText: 'Your message',
                     maxLines: 2,
                     readOnly: true,
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -161,6 +174,7 @@ class _RiveAnimationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
+      flex: 2,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: RiveAnimation.asset(

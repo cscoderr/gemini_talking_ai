@@ -4,10 +4,10 @@ import 'package:typewritertext/typewritertext.dart';
 class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,
-    this.text,
+    required this.text,
   });
 
-  final String? text;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +24,9 @@ class ChatBubble extends StatelessWidget {
       ),
       alignment: Alignment.centerLeft,
       child: TypeWriter.text(
-        'lorem ipsum dolot sit amet ...',
+        text,
         duration: const Duration(milliseconds: 50),
-        style: textTheme.bodyMedium?.copyWith(
+        style: textTheme.bodyLarge?.copyWith(
           color: Colors.white,
         ),
       ),

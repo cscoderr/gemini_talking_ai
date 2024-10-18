@@ -57,7 +57,6 @@ class SpeechToTextServiceImpl extends SpeechToTextService {
     if (!_isSpeechEnabled) return;
     await _speechToText.listen(
       onResult: (result) {
-        print(result.recognizedWords);
         onResult?.call(SpeechToTextResult(
           recognizedWords: result.recognizedWords,
           isFinalResult: result.finalResult,

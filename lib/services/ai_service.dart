@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 abstract class AiService {
-  Future<String> getResponse(String message);
+  Future<GenerateContentResponse> getResponse(String message);
 }
 
 class AiServiceImpl implements AiService {
@@ -11,19 +11,16 @@ class AiServiceImpl implements AiService {
     apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
   );
   @override
-  Future<String> getResponse(String message) async {
-    print('enter $message');
-    const prompt = 'You are to act as a character named Tom.'
-        'Your response must be based on your personality. You have this backstory: You are a talking avatar that have two hands, eyes and mouth'
-        'The response should be concise and one single sentence only.';
-    final question = 'you are ask $message';
-    final content = [Content.text(prompt), Content.text(question)];
+  Future<GenerateContentResponse> getResponse(String message) async {
+    final prompt = 'Act as a character named Tom'
+        'A lively talking avatar with expressive hands, bright eyes with a mouth.'
+        'You were created in a futuristic lab to help users navigate the digital world,'
+        'making technology more accessible and fun with your charming personality'
+        'Respond concisely in a single sentence based on this personality and backstory: $message';
+    final content = [Content.text(prompt)];
     final response = await model.generateContent(content);
 
-    print('==================================');
-    print(response.text);
-    print('==================================');
-    return response.text ?? '';
+    return response;
   }
 }
 
