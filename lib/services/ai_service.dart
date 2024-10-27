@@ -10,6 +10,7 @@ class AiServiceImpl implements AiService {
     model: 'gemini-1.5-pro-latest',
     apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
   );
+
   @override
   Future<GenerateContentResponse> getResponse(String message) async {
     final prompt = 'Act as a character named Tom'
